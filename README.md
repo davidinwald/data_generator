@@ -1,25 +1,31 @@
 # ui-test-dataframe-builder
+
 This library builds dataframes that can be used to help build UI components.
 Suitable to create data for:
+
 - charts
 - tables
 - UIs
 
 ## Features
+
 - ability to specify column types
 
- ## Usage
- ```
+## Usage
+
+```
 const sampleColTypes = [
-  { name: "column1", type: "string", subType: "name" },
-  { name: "column2", type: "number", min: 0, max: 100, precision: 2 },
-  { name: "columnA", type: "boolean" },
-  { name: "columnB", type: "integer", min: 0, max: 100 }, // New column for integers
+ { name: "column1", type: "string", subType: "name" },
+ { name: "column2", type: "number", min: 0, max: 100, precision: 2 },
+ { name: "columnA", type: "boolean" },
+ { name: "columnB", type: "integer", min: 0, max: 100 }, // New column for integers
 ];
 ```
+
 `console.log("testData", testData);`
 
 Result:
+
 ```
 testData [
   {
@@ -43,7 +49,7 @@ testData [
   {
     column1: 'Ava Garden',
     column2: 51.95044,
-  ✓  2 generateData.spec.js:12:1 › Verify generated dataframe has column names as expected (91ms)
+    columnA: true,
     columnB: 47
   },
   {
