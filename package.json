@@ -1,0 +1,32 @@
+{
+  "name": "data_generator",
+  "version": "0.1.0",
+  "description": "package used to generate sample data for charts, table, and more",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davidinwald/data_generator.git"
+  },
+  "keywords": [
+    "sample",
+    "data",
+    "generator",
+    "testing",
+    "development"
+  ],
+  "author": "davidinwald",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/davidinwald/data_generator/issues"
+  },
+  "homepage": "https://github.com/davidinwald/data_generator#readme",
+  "devDependencies": {
+    "playwright": "^1.41.1"
+  },
+  "dependencies": {
+    "@playwright/test": "^1.41.1"
+  }
+}
