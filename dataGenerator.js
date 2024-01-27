@@ -1,6 +1,7 @@
-const generateName = require("./data/names");
+const generateName = require('./data/names');
 // this function generates sample data that can be helpful for dev purposes
-// input parameters include the number of columns, number of rows, and the type of data for each column
+// input parameters include the number of columns, number of rows,
+// and the type of data for each column
 const generateData = ({ numRows, colTypes }) => {
   const data = [];
 
@@ -8,7 +9,6 @@ const generateData = ({ numRows, colTypes }) => {
     const row = {};
 
     for (let j = 0; j < colTypes.length; j++) {
-      const colType = colTypes[j].type;
       const colName = colTypes[j].name;
       row[colName] = generateDataByType({ ...colTypes[j] });
     }
@@ -25,15 +25,15 @@ module.exports = generateData;
 // this function generates a single value of a given type
 const generateDataByType = ({ type, min, max, subType }) => {
   switch (type) {
-    case "string":
+    case 'string':
       return generateString({ subType });
-    case "integer":
+    case 'integer':
       return generateInteger({ min, max });
-    case "number":
+    case 'number':
       return generateNumber({ min, max });
-    case "boolean":
+    case 'boolean':
       return generateBoolean();
-    case "date":
+    case 'date':
       return generateDate();
     default:
       return generateString();
@@ -43,12 +43,12 @@ const generateDataByType = ({ type, min, max, subType }) => {
 // Path: dataGenerator.js
 // this function generates a random string
 const generateString = ({ subType }) => {
-  if (subType === "name") {
+  if (subType === 'name') {
     return generateName();
   }
 
   const length = Math.floor(Math.random() * 10) + 1;
-  let str = "";
+  let str = '';
 
   for (let i = 0; i < length; i++) {
     const charCode = Math.floor(Math.random() * 26) + 97;
@@ -72,33 +72,6 @@ const generateDate = () => {
   const day = Math.floor(Math.random() * 28);
 
   return new Date(year, month, day);
-};
-
-// Path: dataGenerator.js
-// this function generates a random array
-const generateArray = () => {
-  const length = Math.floor(Math.random() * 10) + 1;
-  const arr = [];
-
-  for (let i = 0; i < length; i++) {
-    arr.push(generateString());
-  }
-
-  return arr;
-};
-
-// Path: dataGenerator.js
-// this function generates a random object
-
-const generateObject = () => {
-  const length = Math.floor(Math.random() * 10) + 1;
-  const obj = {};
-
-  for (let i = 0; i < length; i++) {
-    obj[generateString()] = generateString();
-  }
-
-  return obj;
 };
 
 // Path: dataGenerator.js

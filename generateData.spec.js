@@ -1,29 +1,29 @@
-const { test, expect } = require("@playwright/test");
+const { test, expect } = require('@playwright/test');
 
-const generateData = require("./dataGenerator");
+const generateData = require('./dataGenerator');
 
 const sampleSchema = [
-  { name: "column1", type: "string", subType: "name" },
-  { name: "column2", type: "number", min: 0, max: 100, precision: 2 },
-  { name: "columnA", type: "boolean" },
-  { name: "columnB", type: "integer", min: 0, max: 100 }, // New column for integers
+  { name: 'column1', type: 'string', subType: 'name' },
+  { name: 'column2', type: 'number', min: 0, max: 100, precision: 2 },
+  { name: 'columnA', type: 'boolean' },
+  { name: 'columnB', type: 'integer', min: 0, max: 100 }, // New column for integers
 ];
 
-test("Verify generated dataframe has column names as expected", async () => {
+test('Verify generated dataframe has column names as expected', async () => {
   // Generate sample data
   const testData = generateData({
     numRows: 5,
     colTypes: sampleSchema,
   });
 
-  console.log("testData", testData);
+  console.log('testData', testData);
 
   // Perform assertions to verify the generated data
   expect(testData).toHaveLength(5);
-  expect(testData[0]).toHaveProperty("column1");
-  expect(testData[0]).toHaveProperty("column2");
-  expect(testData[0]).toHaveProperty("columnA");
-  expect(testData[0]).toHaveProperty("columnB"); // New column
+  expect(testData[0]).toHaveProperty('column1');
+  expect(testData[0]).toHaveProperty('column2');
+  expect(testData[0]).toHaveProperty('columnA');
+  expect(testData[0]).toHaveProperty('columnB'); // New column
 
   // Check for extra columns
   testData.forEach((data) => {
@@ -31,7 +31,7 @@ test("Verify generated dataframe has column names as expected", async () => {
   });
 });
 
-test("Verify generated dataframe has the correct number of rows", async () => {
+test('Verify generated dataframe has the correct number of rows', async () => {
   // Generate sample data
   const testData = generateData({
     numRows: 10, // Change the number of rows as per your requirement
@@ -51,7 +51,7 @@ test("Verify generated dataframe has the correct number of rows", async () => {
   });
 });
 
-test("Verify generated dataframe has correct data types for each column", async () => {
+test('Verify generated dataframe has correct data types for each column', async () => {
   // Generate sample data
   const testData = generateData({
     numRows: 5,
@@ -60,14 +60,14 @@ test("Verify generated dataframe has correct data types for each column", async 
 
   // Perform assertions to verify the data types
   testData.forEach((data) => {
-    expect(typeof data.column1).toBe("string");
-    expect(typeof data.column2).toBe("number");
-    expect(typeof data.columnA).toBe("boolean");
+    expect(typeof data.column1).toBe('string');
+    expect(typeof data.column2).toBe('number');
+    expect(typeof data.columnA).toBe('boolean');
     expect(Number.isInteger(data.columnB)).toBe(true); // New assertion for integer column
   });
 });
 
-test("Verify generated dataframe respects min and max values for integer column", async () => {
+test('Verify generated dataframe respects min and max values for integer column', async () => {
   // Generate sample data
   const testData = generateData({
     numRows: 5,

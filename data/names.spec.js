@@ -1,8 +1,8 @@
 // BEGIN: abpxx6d04wxr
-const { test, expect } = require("@playwright/test");
-const generateName = require("./names");
+const { test, expect } = require('@playwright/test');
+const generateName = require('./names');
 
-test("Verify the name generator function returns a valid name", async () => {
+test('Verify the name generator function returns a valid name', async () => {
   // Generate sample data
   const testName = generateName();
 
