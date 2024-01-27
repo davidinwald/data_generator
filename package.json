@@ -1,5 +1,5 @@
 {
-  "name": "data_generator",
+  "name": "ui-test-dataframe-builder",
   "version": "0.1.0",
   "description": "package used to generate sample data for charts, table, and more",
   "main": "index.js",
