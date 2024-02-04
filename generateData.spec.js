@@ -16,8 +16,6 @@ test('Verify generated dataframe has column names as expected', async () => {
     colTypes: sampleSchema,
   });
 
-  console.log('testData', testData);
-
   // Perform assertions to verify the generated data
   expect(testData).toHaveLength(5);
   expect(testData[0]).toHaveProperty('column1');

@@ -92,4 +92,12 @@ const generateName = () => {
   return `${firstName} ${lastName}`;
 };
 
-module.exports = generateName;
+const generateNames = (numNames = 1) => {
+  const names = [];
+  for (let i = 0; i < numNames; i++) {
+    names.push(generateName());
+  }
+  return names;
+};
+
+module.exports = generateNames;
