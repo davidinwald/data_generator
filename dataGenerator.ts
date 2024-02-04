@@ -3,10 +3,10 @@ const generateName = require('./data/names');
 // input parameters include the number of columns, number of rows,
 // and the type of data for each column
 const generateData = ({ numRows, colTypes }) => {
-  const data = [];
+  const data: any[] = [];
 
   for (let i = 0; i < numRows; i++) {
-    const row = {};
+    const row: { [key: string]: any } = {};
 
     for (let j = 0; j < colTypes.length; j++) {
       const colName = colTypes[j].name;
@@ -36,7 +36,7 @@ const generateDataByType = ({ type, min, max, subType }) => {
     case 'date':
       return generateDate();
     default:
-      return generateString();
+      return generateString({ subType: subType || null });
   }
 };
 
