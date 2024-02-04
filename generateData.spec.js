@@ -78,3 +78,17 @@ test('Verify generated dataframe respects min and max values for integer column'
     expect(data.columnB).toBeLessThanOrEqual(100);
   });
 });
+test('Verify the runtime for generating different numbers of rows', async () => {
+  const lengthsToCheck = [100, 1000, 10000, 100000, 1000000];
+  lengthsToCheck.forEach((length) => {
+    const startTime = Date.now();
+    generateData({
+      numRows: length,
+      colTypes: sampleSchema,
+    });
+    const endTime = Date.now();
+    const runtime = endTime - startTime;
+    console.log(`Time taken to generate ${length} rows: ${runtime}ms`);
+    expect(runtime).toBeLessThan(1000);
+  });
+});

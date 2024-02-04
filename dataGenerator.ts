@@ -94,7 +94,7 @@ const generateInteger = ({ min = 0, max = 100, numRows }) => {
 const generateNumber = ({ min = 0, max = 100, precision = 5, numRows }) => {
   const range = max - min;
   const randomValues = Array(numRows)
-    .fill()
+    .fill(undefined, 0, numRows)
     .map(() => {
       const randomValue = Math.random() * range + min;
       const multiplier = Math.pow(10, precision);
