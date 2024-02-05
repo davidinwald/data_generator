@@ -1,8 +1,8 @@
 {
   "name": "dataframe-builder",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "package used to generate sample data for charts, table, and more. dataframes are returned once the columnTypes and row count",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
     "test": "playwright test",
     "lint": "eslint ."
@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/davidinwald/data_generator#readme",
   "devDependencies": {
+    "@types/node": "^20.11.16",
     "eslint": "^8.56.0",
     "eslint-config-google": "^0.14.0",
     "eslint-config-prettier": "^9.1.0",
