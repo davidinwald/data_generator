@@ -60,3 +60,7 @@ testData [
   }
 ]
 ```
+
+### Screenshot of sample usage
+
+![Alt text](image.png)
