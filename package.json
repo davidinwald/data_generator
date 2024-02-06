@@ -1,6 +1,6 @@
 {
   "name": "dataframe-builder",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "package used to generate sample data for charts, table, and more. dataframes are returned once the columnTypes and row count",
   "main": "dist/index.js",
   "scripts": {

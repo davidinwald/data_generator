@@ -1,4 +1,6 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.generateData = void 0;
 const { generateNames } = require('./data/names');
 // this function generates sample data that can be helpful for dev purposes
 // input parameters include the number of columns, number of rows,
@@ -24,7 +26,7 @@ const generateData = ({ numRows, colTypes, //
     }
     return data;
 };
-module.exports = generateData;
+exports.generateData = generateData;
 // Path: dataGenerator.js
 // this function generates a single value of a given type
 const generateDataByType = ({ type, min, max, subType, numRows, }) => {

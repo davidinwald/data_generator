@@ -2,7 +2,7 @@ const { generateNames } = require('./data/names');
 // this function generates sample data that can be helpful for dev purposes
 // input parameters include the number of columns, number of rows,
 // and the type of data for each column
-const generateData = ({
+export const generateData = ({
   numRows,
   colTypes, //
 }: {
@@ -33,8 +33,6 @@ const generateData = ({
 
   return data;
 };
-
-module.exports = generateData;
 
 // Path: dataGenerator.js
 // this function generates a single value of a given type

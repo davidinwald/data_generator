@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
 
-const generateData = require('./dataGenerator');
+const { generateData } = require('./dataGenerator');
 
 const sampleSchema = [
   { name: 'column1', type: 'string', subType: 'name' },
