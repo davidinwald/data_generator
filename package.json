@@ -1,8 +1,8 @@
 {
   "name": "dataframe-builder",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "package used to generate sample data for charts, table, and more. dataframes are returned once the columnTypes and row count",
-  "main": "index.ts",
+  "main": "dist/index.js",
   "scripts": {
     "test": "playwright test src/",
     "lint": "eslint src"
