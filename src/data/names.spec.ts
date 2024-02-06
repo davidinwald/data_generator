@@ -1,6 +1,6 @@
-// BEGIN: abpxx6d04wxr
+import { generateNames } from './names';
+
 const { test, expect } = require('@playwright/test');
-const generateNames = require('./names');
 
 test('Verify the name generator function returns a valid name', async () => {
   // Generate sample data

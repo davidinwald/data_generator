@@ -1,10 +1,10 @@
-const generateNames = require('./data/names');
+const { generateNames } = require('./data/names');
 // this function generates sample data that can be helpful for dev purposes
 // input parameters include the number of columns, number of rows,
 // and the type of data for each column
 const generateData = ({
   numRows,
-  colTypes,
+  colTypes, //
 }: {
   numRows: number;
   colTypes: any[];
