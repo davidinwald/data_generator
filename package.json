@@ -4,8 +4,8 @@
   "description": "package used to generate sample data for charts, table, and more. dataframes are returned once the columnTypes and row count",
   "main": "index.ts",
   "scripts": {
-    "test": "playwright test",
-    "lint": "eslint ."
+    "test": "playwright test src/",
+    "lint": "eslint src"
   },
   "repository": {
     "type": "git",
