@@ -1,0 +1,10 @@
+src/
+.github/
+test-results/
+.eslintrc.js
+.prettierrc.json
+tsconfig.json
+*.png
+.gitattributes
+.gitignore
+README.md 
