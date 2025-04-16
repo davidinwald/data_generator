@@ -1,15 +1,16 @@
 {
   "name": "dataframe-builder",
-  "version": "0.4.4",
+  "version": "0.4.6",
   "description": "package used to generate sample data for charts, table, and more. dataframes are returned once the columnTypes and row count",
   "main": "dist/index.js",
   "scripts": {
     "test": "playwright test src/",
     "lint": "eslint src",
     "build": "tsc",
-    "release:patch": "npm version patch && npm install && npm run test && npm run build && npm publish",
-    "release:minor": "npm version minor && npm install && npm run test && npm run build && npm publish",
-    "release:major": "npm version major && npm install && npm run test && npm run build && npm publish"
+    "prerelease:check": "node -e \"const pkg = require('./package.json'); console.log('\\nCurrent version:', pkg.version);\"",
+    "release:patch": "npm run prerelease:check && npm version patch --no-git-tag-version && node -e \"const pkg = require('./package.json'); console.log('Will update to:', pkg.version, '\\n\\nPress Ctrl+C to cancel or wait 5 seconds to continue...');\" && powershell -Command \"Start-Sleep -Seconds 5\" && npm install && npm run test && npm run build && npm publish",
+    "release:minor": "npm run prerelease:check && npm version minor --no-git-tag-version && node -e \"const pkg = require('./package.json'); console.log('Will update to:', pkg.version, '\\n\\nPress Ctrl+C to cancel or wait 5 seconds to continue...');\" && powershell -Command \"Start-Sleep -Seconds 5\" && npm install && npm run test && npm run build && npm publish",
+    "release:major": "npm run prerelease:check && npm version major --no-git-tag-version && node -e \"const pkg = require('./package.json'); console.log('Will update to:', pkg.version, '\\n\\nPress Ctrl+C to cancel or wait 5 seconds to continue...');\" && node -e \"const pkg = require('./package.json'); console.log('\\nWARNING: This is a MAJOR version update!\\nCurrent version:', pkg.version, '\\n\\nPress Ctrl+C to cancel or wait 10 seconds to continue...');\" && powershell -Command \"Start-Sleep -Seconds 10\" && npm install && npm run test && npm run build && npm publish"
   },
   "repository": {
     "type": "git",
