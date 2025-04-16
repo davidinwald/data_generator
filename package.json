@@ -6,7 +6,10 @@
   "scripts": {
     "test": "playwright test src/",
     "lint": "eslint src",
-    "build": "tsc"
+    "build": "tsc",
+    "release:patch": "npm version patch && npm install && npm run test && npm run build && npm publish",
+    "release:minor": "npm version minor && npm install && npm run test && npm run build && npm publish",
+    "release:major": "npm version major && npm install && npm run test && npm run build && npm publish"
   },
   "repository": {
     "type": "git",
