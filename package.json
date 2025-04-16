@@ -1,6 +1,6 @@
 {
   "name": "dataframe-builder",
-  "version": "0.4.6",
+  "version": "0.4.7",
   "description": "A powerful TypeScript/JavaScript library for generating realistic sample data, test data, and mock data. Create dataframes with customizable column types, mathematical series, and random distributions. Perfect for testing, development, and data visualization.",
   "main": "dist/index.js",
   "scripts": {
