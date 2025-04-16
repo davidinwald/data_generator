@@ -11,6 +11,12 @@ export interface ColumnType {
   max?: number;
   subType?: string;
   format?: string;
+  foreignKey?: {
+    table: string;
+    column: string;
+  };
+  parentKey?: string;
+  children?: ColumnType[];
 }
 
 export type DataType = 'string' | 'integer' | 'number' | 'boolean' | 'date';
@@ -18,6 +24,12 @@ export type DataType = 'string' | 'integer' | 'number' | 'boolean' | 'date';
 export interface DataGenerationOptions {
   numRows: number;
   colTypes: ColumnType[];
+  relationships?: {
+    [key: string]: {
+      table: string;
+      column: string;
+    };
+  };
 }
 
 export interface StringGenerationOptions {
@@ -44,7 +56,30 @@ export interface DateGenerationOptions {
   numRows: number;
 }
 
-export const generateData = ({ numRows, colTypes }: DataGenerationOptions) => {
+export type StringSubType =
+  | 'name'
+  | 'email'
+  | 'phone'
+  | 'address'
+  | 'username'
+  | 'password'
+  | '';
+
+interface ColumnArray {
+  column: string;
+  values?: any[];
+  isForeignKey?: boolean;
+  foreignKey?: {
+    table: string;
+    column: string;
+  };
+}
+
+export const generateData = ({
+  numRows,
+  colTypes,
+  relationships = {},
+}: DataGenerationOptions) => {
   if (numRows <= 0) {
     throw new Error('Number of rows must be greater than 0');
   }
@@ -54,21 +89,61 @@ export const generateData = ({ numRows, colTypes }: DataGenerationOptions) => {
   }
 
   const data: Record<string, any>[] = [];
+  const referenceData: Record<string, any[]> = {};
 
-  const columnArrays = colTypes.map((colType) => {
+  // First pass: Generate all non-foreign key columns
+  const columnArrays: ColumnArray[] = colTypes.map((colType) => {
+    if (colType.foreignKey) {
+      // Store the column name for later processing
+      return {
+        column: colType.name,
+        isForeignKey: true,
+        foreignKey: colType.foreignKey,
+      };
+    }
+
     return {
       column: colType.name,
       values: generateDataByType({ ...colType, numRows }),
     };
   });
 
+  // Generate reference data for foreign keys
+  Object.entries(relationships).forEach(([tableName, { column }]) => {
+    const referenceColType = colTypes.find((col) => col.name === column);
+    if (referenceColType) {
+      referenceData[tableName] = generateDataByType({
+        ...referenceColType,
+        numRows,
+      });
+    }
+  });
+
+  // Second pass: Generate rows with foreign key relationships
   for (let i = 0; i < numRows; i++) {
     const row: Record<string, any> = {};
 
     for (let j = 0; j < colTypes.length; j++) {
       const colName = colTypes[j].name;
+      const columnArray = columnArrays[j];
+
       if (!row[colName]) {
-        row[colName] = columnArrays[j].values[i];
+        if (columnArray.isForeignKey && columnArray.foreignKey) {
+          const { table, column } = columnArray.foreignKey;
+          if (referenceData[table] && referenceData[table].length > 0) {
+            // Randomly select a value from the reference data
+            row[colName] =
+              referenceData[table][
+                Math.floor(Math.random() * referenceData[table].length)
+              ];
+          } else {
+            throw new Error(
+              `No reference data found for foreign key: ${table}.${column}`,
+            );
+          }
+        } else if (columnArray.values) {
+          row[colName] = columnArray.values[i];
+        }
       }
     }
 
@@ -105,26 +180,102 @@ const generateDataByType = ({
 };
 
 // this function generates a random string
-const generateString = ({
-  subType,
-  numRows,
-}: {
-  subType: string;
-  numRows: number;
-}) => {
-  if (subType === 'name') {
-    return generateNames(numRows);
+const generateString = ({ subType, numRows }: StringGenerationOptions) => {
+  switch (subType) {
+    case 'name':
+      return generateNames(numRows);
+    case 'email':
+      return generateEmails(numRows);
+    case 'phone':
+      return generatePhoneNumbers(numRows);
+    case 'address':
+      return generateAddresses(numRows);
+    case 'username':
+      return generateUsernames(numRows);
+    case 'password':
+      return generatePasswords(numRows);
+    default:
+      return generateRandomStrings(numRows);
   }
+};
 
-  const length = Math.floor(Math.random() * 10) + 1;
-  let str = '';
+// Helper functions for string generation
+const generateRandomStrings = (numRows: number): string[] => {
+  return Array(numRows)
+    .fill(undefined)
+    .map(() => {
+      const length = Math.floor(Math.random() * 10) + 1;
+      let str = '';
+      for (let i = 0; i < length; i++) {
+        const charCode = Math.floor(Math.random() * 26) + 97;
+        str += String.fromCharCode(charCode);
+      }
+      return str;
+    });
+};
 
-  for (let i = 0; i < length; i++) {
-    const charCode = Math.floor(Math.random() * 26) + 97;
-    str += String.fromCharCode(charCode);
-  }
+const generateEmails = (numRows: number): string[] => {
+  const domains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com'];
+  return Array(numRows)
+    .fill(undefined)
+    .map(() => {
+      const username = generateRandomStrings(1)[0];
+      const domain = domains[Math.floor(Math.random() * domains.length)];
+      return `${username}@${domain}`;
+    });
+};
 
-  return str.repeat(numRows);
+const generatePhoneNumbers = (numRows: number): string[] => {
+  return Array(numRows)
+    .fill(undefined)
+    .map(() => {
+      const areaCode = Math.floor(Math.random() * 900) + 100;
+      const prefix = Math.floor(Math.random() * 900) + 100;
+      const lineNumber = Math.floor(Math.random() * 9000) + 1000;
+      return `(${areaCode}) ${prefix}-${lineNumber}`;
+    });
+};
+
+const generateAddresses = (numRows: number): string[] => {
+  const streets = ['Main St', 'Oak Ave', 'Pine St', 'Maple Dr', 'Cedar Ln'];
+  const cities = ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix'];
+  const states = ['NY', 'CA', 'IL', 'TX', 'AZ'];
+
+  return Array(numRows)
+    .fill(undefined)
+    .map(() => {
+      const streetNum = Math.floor(Math.random() * 9999) + 1;
+      const street = streets[Math.floor(Math.random() * streets.length)];
+      const city = cities[Math.floor(Math.random() * cities.length)];
+      const state = states[Math.floor(Math.random() * states.length)];
+      const zip = Math.floor(Math.random() * 90000) + 10000;
+      return `${streetNum} ${street}, ${city}, ${state} ${zip}`;
+    });
+};
+
+const generateUsernames = (numRows: number): string[] => {
+  const prefixes = ['user', 'dev', 'admin', 'test', 'demo'];
+  return Array(numRows)
+    .fill(undefined)
+    .map(() => {
+      const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+      const suffix = Math.floor(Math.random() * 9999);
+      return `${prefix}${suffix}`;
+    });
+};
+
+const generatePasswords = (numRows: number): string[] => {
+  const chars =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+  return Array(numRows)
+    .fill(undefined)
+    .map(() => {
+      let password = '';
+      for (let i = 0; i < 12; i++) {
+        password += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return password;
+    });
 };
 
 // this function generates a random boolean

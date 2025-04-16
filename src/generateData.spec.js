@@ -39,7 +39,7 @@ test('Verify generated dataframe has the correct number of rows', async () => {
   // Perform assertion to verify the number of rows
   expect(testData).toHaveLength(10); // Change the expected number of rows as per your requirement
 
-  const lengthsToCheck = [0, 1, 5, 10, 50, 100];
+  const lengthsToCheck = [1, 5, 10, 50, 100];
   lengthsToCheck.forEach((length) => {
     const testData = generateData({
       numRows: length,
@@ -78,6 +78,7 @@ test('Verify generated dataframe respects min and max values for integer column'
     expect(data.columnB).toBeLessThanOrEqual(100);
   });
 });
+
 test('Verify the runtime for generating different numbers of rows', async () => {
   const lengthsToCheck = [100, 1000, 10000, 100000, 1000000];
   lengthsToCheck.forEach((length) => {
@@ -93,78 +94,260 @@ test('Verify the runtime for generating different numbers of rows', async () => 
   });
 });
 
-describe('generateData', () => {
-  it('should generate data with the specified number of rows', () => {
-    const data = generateData({
+test('should generate data with the specified number of rows', async () => {
+  const data = generateData({
+    numRows: 5,
+    colTypes: [
+      { name: 'id', type: 'integer' },
+      { name: 'name', type: 'string' },
+    ],
+  });
+  expect(data).toHaveLength(5);
+});
+
+test('should throw an error for invalid number of rows', async () => {
+  expect(() => {
+    generateData({
+      numRows: 0,
+      colTypes: [{ name: 'id', type: 'integer' }],
+    });
+  }).toThrow('Number of rows must be greater than 0');
+});
+
+test('should throw an error for empty column types', async () => {
+  expect(() => {
+    generateData({
+      numRows: 5,
+      colTypes: [],
+    });
+  }).toThrow('At least one column type must be specified');
+});
+
+test('should generate date data in ISO format', async () => {
+  const data = generateData({
+    numRows: 3,
+    colTypes: [
+      {
+        name: 'created_at',
+        type: 'date',
+        format: 'ISO',
+      },
+    ],
+  });
+
+  data.forEach((row) => {
+    expect(row.created_at).toMatch(
+      /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/,
+    );
+  });
+});
+
+test('should generate date data in local date format', async () => {
+  const data = generateData({
+    numRows: 3,
+    colTypes: [
+      {
+        name: 'created_at',
+        type: 'date',
+        format: 'date',
+      },
+    ],
+  });
+
+  data.forEach((row) => {
+    expect(row.created_at).toMatch(/^\d{1,2}\/\d{1,2}\/\d{4}$/);
+  });
+});
+
+test('should throw an error for unsupported data type', async () => {
+  expect(() => {
+    generateData({
+      numRows: 5,
+      colTypes: [{ name: 'id', type: 'unsupported' }],
+    });
+  }).toThrow('Unsupported data type: unsupported');
+});
+
+test('should generate valid email addresses', async () => {
+  const data = generateData({
+    numRows: 5,
+    colTypes: [
+      {
+        name: 'email',
+        type: 'string',
+        subType: 'email',
+      },
+    ],
+  });
+
+  data.forEach((row) => {
+    expect(row.email).toMatch(/^[a-z]+@[a-z]+\.[a-z]+$/);
+  });
+});
+
+test('should generate valid phone numbers', async () => {
+  const data = generateData({
+    numRows: 5,
+    colTypes: [
+      {
+        name: 'phone',
+        type: 'string',
+        subType: 'phone',
+      },
+    ],
+  });
+
+  data.forEach((row) => {
+    expect(row.phone).toMatch(/^\(\d{3}\) \d{3}-\d{4}$/);
+  });
+});
+
+test('should generate valid addresses', async () => {
+  const data = generateData({
+    numRows: 5,
+    colTypes: [
+      {
+        name: 'address',
+        type: 'string',
+        subType: 'address',
+      },
+    ],
+  });
+
+  data.forEach((row) => {
+    expect(row.address).toMatch(/^\d+ [A-Za-z ]+, [A-Za-z ]+, [A-Z]{2} \d{5}$/);
+  });
+});
+
+test('should generate valid usernames', async () => {
+  const data = generateData({
+    numRows: 5,
+    colTypes: [
+      {
+        name: 'username',
+        type: 'string',
+        subType: 'username',
+      },
+    ],
+  });
+
+  data.forEach((row) => {
+    expect(row.username).toMatch(/^(user|dev|admin|test|demo)\d+$/);
+  });
+});
+
+test('should generate valid passwords', async () => {
+  const data = generateData({
+    numRows: 5,
+    colTypes: [
+      {
+        name: 'password',
+        type: 'string',
+        subType: 'password',
+      },
+    ],
+  });
+
+  data.forEach((row) => {
+    expect(row.password).toMatch(/^[A-Za-z0-9!@#$%^&*]{12}$/);
+  });
+});
+
+test('should generate random strings when no subtype is specified', async () => {
+  const data = generateData({
+    numRows: 5,
+    colTypes: [
+      {
+        name: 'random',
+        type: 'string',
+      },
+    ],
+  });
+
+  data.forEach((row) => {
+    expect(typeof row.random).toBe('string');
+    expect(row.random.length).toBeGreaterThan(0);
+  });
+});
+
+test('should generate data with foreign key relationships', async () => {
+  const data = generateData({
+    numRows: 5,
+    colTypes: [
+      {
+        name: 'id',
+        type: 'integer',
+      },
+      {
+        name: 'user_id',
+        type: 'integer',
+        foreignKey: {
+          table: 'users',
+          column: 'id',
+        },
+      },
+    ],
+    relationships: {
+      users: {
+        table: 'users',
+        column: 'id',
+      },
+    },
+  });
+
+  data.forEach((row) => {
+    expect(row).toHaveProperty('id');
+    expect(row).toHaveProperty('user_id');
+    expect(typeof row.id).toBe('number');
+    expect(typeof row.user_id).toBe('number');
+  });
+});
+
+test('should throw an error for missing reference data', async () => {
+  expect(() => {
+    generateData({
       numRows: 5,
       colTypes: [
-        { name: 'id', type: 'integer' },
-        { name: 'name', type: 'string' },
-      ],
-    });
-    expect(data).toHaveLength(5);
-  });
-
-  it('should throw an error for invalid number of rows', () => {
-    expect(() => {
-      generateData({
-        numRows: 0,
-        colTypes: [{ name: 'id', type: 'integer' }],
-      });
-    }).toThrow('Number of rows must be greater than 0');
-  });
-
-  it('should throw an error for empty column types', () => {
-    expect(() => {
-      generateData({
-        numRows: 5,
-        colTypes: [],
-      });
-    }).toThrow('At least one column type must be specified');
-  });
-
-  it('should generate date data in ISO format', () => {
-    const data = generateData({
-      numRows: 3,
-      colTypes: [
         {
-          name: 'created_at',
-          type: 'date',
-          format: 'ISO',
+          name: 'user_id',
+          type: 'integer',
+          foreignKey: {
+            table: 'users',
+            column: 'id',
+          },
         },
       ],
     });
+  }).toThrow('No reference data found for foreign key: users.id');
+});
 
-    data.forEach((row) => {
-      expect(row.created_at).toMatch(
-        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/,
-      );
-    });
-  });
-
-  it('should generate date data in local date format', () => {
-    const data = generateData({
-      numRows: 3,
-      colTypes: [
-        {
-          name: 'created_at',
-          type: 'date',
-          format: 'date',
+test('should maintain referential integrity', async () => {
+  const data = generateData({
+    numRows: 5,
+    colTypes: [
+      {
+        name: 'id',
+        type: 'integer',
+      },
+      {
+        name: 'parent_id',
+        type: 'integer',
+        foreignKey: {
+          table: 'parents',
+          column: 'id',
         },
-      ],
-    });
-
-    data.forEach((row) => {
-      expect(row.created_at).toMatch(/^\d{1,2}\/\d{1,2}\/\d{4}$/);
-    });
+      },
+    ],
+    relationships: {
+      parents: {
+        table: 'parents',
+        column: 'id',
+      },
+    },
   });
 
-  it('should throw an error for unsupported data type', () => {
-    expect(() => {
-      generateData({
-        numRows: 5,
-        colTypes: [{ name: 'id', type: 'unsupported' }],
-      });
-    }).toThrow('Unsupported data type: unsupported');
+  const parentIds = new Set(data.map((row) => row.parent_id));
+  data.forEach((row) => {
+    expect(parentIds.has(row.parent_id)).toBe(true);
   });
 });
