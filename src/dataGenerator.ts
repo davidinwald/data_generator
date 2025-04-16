@@ -2,14 +2,58 @@ const { generateNames } = require('./data/names');
 // this function generates sample data that can be helpful for dev purposes
 // input parameters include the number of columns, number of rows,
 // and the type of data for each column
-export const generateData = ({
-  numRows,
-  colTypes, //
-}: {
+
+// Data type definitions
+export interface ColumnType {
+  name: string;
+  type: DataType;
+  min?: number;
+  max?: number;
+  subType?: string;
+  format?: string;
+}
+
+export type DataType = 'string' | 'integer' | 'number' | 'boolean' | 'date';
+
+export interface DataGenerationOptions {
   numRows: number;
-  colTypes: any[];
-}) => {
-  const data: any[] = [];
+  colTypes: ColumnType[];
+}
+
+export interface StringGenerationOptions {
+  subType?: string;
+  numRows: number;
+}
+
+export interface NumberGenerationOptions {
+  min?: number;
+  max?: number;
+  precision?: number;
+  numRows: number;
+}
+
+export interface BooleanGenerationOptions {
+  truthRatio?: number;
+  numRows: number;
+}
+
+export interface DateGenerationOptions {
+  startDate?: Date;
+  endDate?: Date;
+  format?: string;
+  numRows: number;
+}
+
+export const generateData = ({ numRows, colTypes }: DataGenerationOptions) => {
+  if (numRows <= 0) {
+    throw new Error('Number of rows must be greater than 0');
+  }
+
+  if (!colTypes || colTypes.length === 0) {
+    throw new Error('At least one column type must be specified');
+  }
+
+  const data: Record<string, any>[] = [];
 
   const columnArrays = colTypes.map((colType) => {
     return {
@@ -19,7 +63,7 @@ export const generateData = ({
   });
 
   for (let i = 0; i < numRows; i++) {
-    const row: { [key: string]: any } = {};
+    const row: Record<string, any> = {};
 
     for (let j = 0; j < colTypes.length; j++) {
       const colName = colTypes[j].name;
@@ -41,14 +85,9 @@ const generateDataByType = ({
   min,
   max,
   subType,
+  format,
   numRows,
-}: {
-  type: string;
-  min?: number;
-  max?: number;
-  subType?: string;
-  numRows: number;
-}) => {
+}: ColumnType & { numRows: number }) => {
   switch (type) {
     case 'string':
       return generateString({ subType: subType || '', numRows });
@@ -58,10 +97,10 @@ const generateDataByType = ({
       return generateNumber({ min, max, numRows });
     case 'boolean':
       return generateBoolean({ truthRatio: 0.9, numRows });
-    // case 'date':
-    //   return generateDate({ numRows });
+    case 'date':
+      return generateDate({ format, numRows });
     default:
-      return generateString({ subType: subType || '', numRows });
+      throw new Error(`Unsupported data type: ${type}`);
   }
 };
 
@@ -136,4 +175,36 @@ const generateNumber = ({
       return roundedValue;
     });
   return randomValues;
+};
+
+// this function generates a random date
+const generateDate = ({
+  startDate = new Date(2000, 0, 1),
+  endDate = new Date(),
+  format = 'ISO',
+  numRows,
+}: DateGenerationOptions) => {
+  const startTime = startDate.getTime();
+  const endTime = endDate.getTime();
+  const timeRange = endTime - startTime;
+
+  return Array(numRows)
+    .fill(undefined, 0, numRows)
+    .map(() => {
+      const randomTime = startTime + Math.random() * timeRange;
+      const date = new Date(randomTime);
+
+      switch (format.toLowerCase()) {
+        case 'iso':
+          return date.toISOString();
+        case 'date':
+          return date.toLocaleDateString();
+        case 'datetime':
+          return date.toLocaleString();
+        case 'timestamp':
+          return date.getTime();
+        default:
+          return date.toISOString();
+      }
+    });
 };

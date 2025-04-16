@@ -92,3 +92,79 @@ test('Verify the runtime for generating different numbers of rows', async () => 
     expect(runtime).toBeLessThan(1000);
   });
 });
+
+describe('generateData', () => {
+  it('should generate data with the specified number of rows', () => {
+    const data = generateData({
+      numRows: 5,
+      colTypes: [
+        { name: 'id', type: 'integer' },
+        { name: 'name', type: 'string' },
+      ],
+    });
+    expect(data).toHaveLength(5);
+  });
+
+  it('should throw an error for invalid number of rows', () => {
+    expect(() => {
+      generateData({
+        numRows: 0,
+        colTypes: [{ name: 'id', type: 'integer' }],
+      });
+    }).toThrow('Number of rows must be greater than 0');
+  });
+
+  it('should throw an error for empty column types', () => {
+    expect(() => {
+      generateData({
+        numRows: 5,
+        colTypes: [],
+      });
+    }).toThrow('At least one column type must be specified');
+  });
+
+  it('should generate date data in ISO format', () => {
+    const data = generateData({
+      numRows: 3,
+      colTypes: [
+        {
+          name: 'created_at',
+          type: 'date',
+          format: 'ISO',
+        },
+      ],
+    });
+
+    data.forEach((row) => {
+      expect(row.created_at).toMatch(
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/,
+      );
+    });
+  });
+
+  it('should generate date data in local date format', () => {
+    const data = generateData({
+      numRows: 3,
+      colTypes: [
+        {
+          name: 'created_at',
+          type: 'date',
+          format: 'date',
+        },
+      ],
+    });
+
+    data.forEach((row) => {
+      expect(row.created_at).toMatch(/^\d{1,2}\/\d{1,2}\/\d{4}$/);
+    });
+  });
+
+  it('should throw an error for unsupported data type', () => {
+    expect(() => {
+      generateData({
+        numRows: 5,
+        colTypes: [{ name: 'id', type: 'unsupported' }],
+      });
+    }).toThrow('Unsupported data type: unsupported');
+  });
+});
