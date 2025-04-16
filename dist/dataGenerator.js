@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.generateData = void 0;
+exports.generateHierarchicalData = exports.generateHierarchical = exports.generateData = void 0;
 const { generateNames } = require('./data/names');
 const generateData = ({ numRows, colTypes, relationships = {}, }) => {
     if (numRows <= 0) {
@@ -216,3 +216,39 @@ const generateDate = ({ startDate = new Date(2000, 0, 1), endDate = new Date(), 
         }
     });
 };
+const generateHierarchicalData = (colTypes, options, depth = 0) => {
+    var _a, _b;
+    if (depth >= (options.maxDepth || 3)) {
+        return [];
+    }
+    const numChildren = Math.floor(Math.random() *
+        ((options.maxChildren || 5) - (options.minChildren || 1) + 1) +
+        (options.minChildren || 1));
+    const result = [];
+    for (let i = 0; i < numChildren; i++) {
+        const item = {};
+        // Generate data for each column
+        colTypes.forEach((colType) => {
+            if (colType.name !== 'children') {
+                item[colType.name] = generateDataByType(Object.assign(Object.assign({}, colType), { numRows: 1 }))[0];
+            }
+        });
+        // Add hierarchical properties
+        if (options.type === 'accordion' || options.type === 'tree') {
+            item.expandable = (_a = options.expandable) !== null && _a !== void 0 ? _a : true;
+            item.expanded = (_b = options.expanded) !== null && _b !== void 0 ? _b : false;
+        }
+        // Generate children if there are child columns defined
+        const childColumns = colTypes.find((col) => col.name === 'children');
+        if ((childColumns === null || childColumns === void 0 ? void 0 : childColumns.children) && depth < (options.maxDepth || 3)) {
+            item.children = generateHierarchicalData(childColumns.children, options, depth + 1);
+        }
+        result.push(item);
+    }
+    return result;
+};
+exports.generateHierarchicalData = generateHierarchicalData;
+const generateHierarchical = (colTypes, options) => {
+    return generateHierarchicalData(colTypes, options);
+};
+exports.generateHierarchical = generateHierarchical;

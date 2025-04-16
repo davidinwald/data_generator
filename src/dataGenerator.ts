@@ -4,7 +4,7 @@ const { generateNames } = require('./data/names');
 // and the type of data for each column
 
 // Data type definitions
-export interface ColumnType {
+interface ColumnType {
   name: string;
   type: DataType;
   min?: number;
@@ -19,9 +19,9 @@ export interface ColumnType {
   children?: ColumnType[];
 }
 
-export type DataType = 'string' | 'integer' | 'number' | 'boolean' | 'date';
+type DataType = 'string' | 'integer' | 'number' | 'boolean' | 'date';
 
-export interface DataGenerationOptions {
+interface DataGenerationOptions {
   numRows: number;
   colTypes: ColumnType[];
   relationships?: {
@@ -30,33 +30,39 @@ export interface DataGenerationOptions {
       column: string;
     };
   };
+  hierarchical?: {
+    type: HierarchicalType;
+    maxDepth?: number;
+    minChildren?: number;
+    maxChildren?: number;
+  };
 }
 
-export interface StringGenerationOptions {
+interface StringGenerationOptions {
   subType?: string;
   numRows: number;
 }
 
-export interface NumberGenerationOptions {
+interface NumberGenerationOptions {
   min?: number;
   max?: number;
   precision?: number;
   numRows: number;
 }
 
-export interface BooleanGenerationOptions {
+interface BooleanGenerationOptions {
   truthRatio?: number;
   numRows: number;
 }
 
-export interface DateGenerationOptions {
+interface DateGenerationOptions {
   startDate?: Date;
   endDate?: Date;
   format?: string;
   numRows: number;
 }
 
-export type StringSubType =
+type StringSubType =
   | 'name'
   | 'email'
   | 'phone'
@@ -64,6 +70,22 @@ export type StringSubType =
   | 'username'
   | 'password'
   | '';
+
+type HierarchicalType = 'accordion' | 'tree' | 'nested-list' | 'menu';
+
+interface HierarchicalOptions {
+  type: HierarchicalType;
+  maxDepth?: number;
+  minChildren?: number;
+  maxChildren?: number;
+  expandable?: boolean;
+  expanded?: boolean;
+}
+
+interface HierarchicalColumnType extends ColumnType {
+  hierarchical?: HierarchicalOptions;
+  children?: HierarchicalColumnType[];
+}
 
 interface ColumnArray {
   column: string;
@@ -75,7 +97,7 @@ interface ColumnArray {
   };
 }
 
-export const generateData = ({
+const generateData = ({
   numRows,
   colTypes,
   relationships = {},
@@ -358,4 +380,79 @@ const generateDate = ({
           return date.toISOString();
       }
     });
+};
+
+const generateHierarchicalData = (
+  colTypes: HierarchicalColumnType[],
+  options: HierarchicalOptions,
+  depth: number = 0,
+): any[] => {
+  if (depth >= (options.maxDepth || 3)) {
+    return [];
+  }
+
+  const numChildren = Math.floor(
+    Math.random() *
+      ((options.maxChildren || 5) - (options.minChildren || 1) + 1) +
+      (options.minChildren || 1),
+  );
+
+  const result = [];
+  for (let i = 0; i < numChildren; i++) {
+    const item: any = {};
+
+    // Generate data for each column
+    colTypes.forEach((colType) => {
+      if (colType.name !== 'children') {
+        item[colType.name] = generateDataByType({
+          ...colType,
+          numRows: 1,
+        })[0];
+      }
+    });
+
+    // Add hierarchical properties
+    if (options.type === 'accordion' || options.type === 'tree') {
+      item.expandable = options.expandable ?? true;
+      item.expanded = options.expanded ?? false;
+    }
+
+    // Generate children if there are child columns defined
+    const childColumns = colTypes.find((col) => col.name === 'children');
+    if (childColumns?.children && depth < (options.maxDepth || 3)) {
+      item.children = generateHierarchicalData(
+        childColumns.children,
+        options,
+        depth + 1,
+      );
+    }
+
+    result.push(item);
+  }
+
+  return result;
+};
+
+const generateHierarchical = (
+  colTypes: HierarchicalColumnType[],
+  options: HierarchicalOptions,
+): any[] => {
+  return generateHierarchicalData(colTypes, options);
+};
+
+export {
+  generateData,
+  generateHierarchical,
+  generateHierarchicalData,
+  ColumnType,
+  DataType,
+  DataGenerationOptions,
+  StringGenerationOptions,
+  NumberGenerationOptions,
+  BooleanGenerationOptions,
+  DateGenerationOptions,
+  StringSubType,
+  HierarchicalType,
+  HierarchicalOptions,
+  HierarchicalColumnType,
 };

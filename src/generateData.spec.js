@@ -1,6 +1,5 @@
-const { test, expect } = require('@playwright/test');
-
-const { generateData } = require('./dataGenerator');
+import { test, expect } from '@playwright/test';
+import { generateData, generateHierarchical } from './dataGenerator';
 
 const sampleSchema = [
   { name: 'column1', type: 'string', subType: 'name' },
@@ -350,4 +349,219 @@ test('should maintain referential integrity', async () => {
   data.forEach((row) => {
     expect(parentIds.has(row.parent_id)).toBe(true);
   });
+});
+
+test('should generate accordion data with correct structure', async () => {
+  const accordionSchema = [
+    {
+      name: 'title',
+      type: 'string',
+      subType: 'name',
+    },
+    {
+      name: 'description',
+      type: 'string',
+    },
+    {
+      name: 'children',
+      type: 'string',
+      children: [
+        {
+          name: 'title',
+          type: 'string',
+          subType: 'name',
+        },
+        {
+          name: 'content',
+          type: 'string',
+        },
+      ],
+    },
+  ];
+
+  const options = {
+    type: 'accordion',
+    maxDepth: 2,
+    minChildren: 2,
+    maxChildren: 3,
+    expandable: true,
+    expanded: false,
+  };
+
+  const result = generateHierarchical(accordionSchema, options);
+
+  expect(Array.isArray(result)).toBe(true);
+  expect(result.length).toBeGreaterThan(0);
+
+  // Check first level structure
+  const firstItem = result[0];
+  expect(firstItem).toHaveProperty('title');
+  expect(firstItem).toHaveProperty('description');
+  expect(firstItem).toHaveProperty('expandable', true);
+  expect(firstItem).toHaveProperty('expanded', false);
+  expect(firstItem).toHaveProperty('children');
+
+  // Check second level structure
+  if (firstItem.children && firstItem.children.length > 0) {
+    const secondItem = firstItem.children[0];
+    expect(secondItem).toHaveProperty('title');
+    expect(secondItem).toHaveProperty('content');
+    expect(secondItem).toHaveProperty('expandable', true);
+    expect(secondItem).toHaveProperty('expanded', false);
+  }
+});
+
+test('should respect maxDepth parameter in hierarchical data', async () => {
+  const accordionSchema = [
+    {
+      name: 'title',
+      type: 'string',
+      subType: 'name',
+    },
+    {
+      name: 'children',
+      type: 'string',
+      children: [
+        {
+          name: 'title',
+          type: 'string',
+          subType: 'name',
+        },
+      ],
+    },
+  ];
+
+  const options = {
+    type: 'accordion',
+    maxDepth: 1,
+    minChildren: 1,
+    maxChildren: 1,
+  };
+
+  const result = generateHierarchical(accordionSchema, options);
+  const firstItem = result[0];
+
+  expect(firstItem).toHaveProperty('children');
+  if (firstItem.children && firstItem.children.length > 0) {
+    const secondItem = firstItem.children[0];
+    expect(secondItem).not.toHaveProperty('children');
+  }
+});
+
+test('should respect minChildren and maxChildren parameters in hierarchical data', async () => {
+  const accordionSchema = [
+    {
+      name: 'title',
+      type: 'string',
+      subType: 'name',
+    },
+    {
+      name: 'children',
+      type: 'string',
+      children: [
+        {
+          name: 'title',
+          type: 'string',
+          subType: 'name',
+        },
+      ],
+    },
+  ];
+
+  const options = {
+    type: 'accordion',
+    maxDepth: 2,
+    minChildren: 2,
+    maxChildren: 2,
+  };
+
+  const result = generateHierarchical(accordionSchema, options);
+  const firstItem = result[0];
+
+  // Check first level children count
+  expect(firstItem.children).toBeDefined();
+  expect(firstItem.children.length).toBe(2);
+
+  // Check second level children count if they exist
+  if (firstItem.children && firstItem.children.length > 0) {
+    const secondItem = firstItem.children[0];
+    if (secondItem.children) {
+      expect(secondItem.children.length).toBe(2);
+    }
+  }
+});
+
+test('should generate different hierarchical types correctly', async () => {
+  const accordionSchema = [
+    {
+      name: 'title',
+      type: 'string',
+      subType: 'name',
+    },
+    {
+      name: 'children',
+      type: 'string',
+      children: [
+        {
+          name: 'title',
+          type: 'string',
+          subType: 'name',
+        },
+      ],
+    },
+  ];
+
+  const types = ['accordion', 'tree', 'nested-list', 'menu'];
+
+  types.forEach((type) => {
+    const options = {
+      type,
+      maxDepth: 1,
+      minChildren: 1,
+      maxChildren: 1,
+    };
+
+    const result = generateHierarchical(accordionSchema, options);
+    expect(Array.isArray(result)).toBe(true);
+    expect(result.length).toBeGreaterThan(0);
+
+    if (type === 'accordion' || type === 'tree') {
+      expect(result[0]).toHaveProperty('expandable', true);
+      expect(result[0]).toHaveProperty('expanded', false);
+    }
+  });
+});
+
+test('should handle custom expandable and expanded states in hierarchical data', async () => {
+  const accordionSchema = [
+    {
+      name: 'title',
+      type: 'string',
+      subType: 'name',
+    },
+    {
+      name: 'children',
+      type: 'string',
+      children: [
+        {
+          name: 'title',
+          type: 'string',
+          subType: 'name',
+        },
+      ],
+    },
+  ];
+
+  const options = {
+    type: 'accordion',
+    maxDepth: 1,
+    minChildren: 1,
+    maxChildren: 1,
+    expandable: false,
+    expanded: true,
+  };
+
+  const result = generateHierarchical(accordionSchema, options);
+  expect(result[0]).toHaveProperty('expandable', false);
+  expect(result[0]).toHaveProperty('expanded', true);
 });
